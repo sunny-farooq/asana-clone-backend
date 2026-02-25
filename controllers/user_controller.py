@@ -1,11 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from models.account import account
 from models.organization import organization
+from models.organization_member import organization_member
 from argon2 import PasswordHasher
 from helpers.user_helper import create_access_token
-from typing import Annotated
 from pydantic import BaseModel
-import argon2
 
 ph = PasswordHasher()
 
@@ -13,9 +12,6 @@ class signup(BaseModel):
     name: str
     email: str
     password: str
-
-
-
 
 user_router = APIRouter(tags = ["User"])
 
@@ -30,12 +26,12 @@ async def user_signup(request: signup):
     if check_before:
         raise HTTPException(status_code=409,detail= "Email Already in use")
     try:
-        
         new_organization = await organization.create(name=organization_name)
         hashed_password=ph.hash(request.password)
 
         new_user = await account.create(name=request.name,email=request.email,password=hashed_password,role="owner",organization_id=new_organization.id)
-        return {"name": new_user.name, "email": request.email, "Organization_name": organization_name }
+        new_org_member = await organization_member.create(role="owner", account_id=new_user.id, organization_id=new_organization.id  )
+        return {"name": new_user.name, "email": request.email, "Organization_name": organization_name, "organization_member_id": new_org_member.id }
     except Exception as e:
         raise HTTPException(401, str(e))
 
@@ -49,4 +45,5 @@ async def login(email: str, password: str):
         return {"token": token}
     except Exception as e:
         raise HTTPException(status_code=405,detail= "Wrong Password")
+
 
