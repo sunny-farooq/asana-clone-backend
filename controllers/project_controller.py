@@ -19,3 +19,10 @@ async def update(user: Annotated[account,Depends(read_current_user)], status:str
     org_id = user.organization_id
     new_status = await project.filter(organization_id=org_id).update(status=status)
     return {"status":f"Project Status set to {status}"}
+
+
+@project_router.post("/update_project_name")
+async def update_name(user: Annotated[account,Depends(read_current_user)], name:str):
+    org_id = user.organization_id
+    new_status = await project.filter(organization_id=org_id).update(name=name)
+    return {"status":f"Project Name set to {name}"}
