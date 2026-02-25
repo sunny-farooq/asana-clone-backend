@@ -27,8 +27,7 @@ async def user_signup(request: signup):
         raise HTTPException(status_code=409,detail= "Email Already in use")
     try:
         new_organization = await organization.create(name=organization_name)
-        hashed_password=ph.hash(request.password)
-
+        hashed_password=ph.hash(request.password)   
         new_user = await account.create(name=request.name,email=request.email,password=hashed_password,role="owner",organization_id=new_organization.id)
         new_org_member = await organization_member.create(role="owner", account_id=new_user.id, organization_id=new_organization.id  )
         return {"name": new_user.name, "email": request.email, "Organization_name": organization_name, "organization_member_id": new_org_member.id }

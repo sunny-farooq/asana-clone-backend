@@ -3,6 +3,8 @@ from helpers.tortoise_config import init
 from controllers import user_controller
 from controllers import organization_controller
 from controllers import project_controller
+from controllers import task_controller
+from controllers import comment_controller
 
 
 async def lifespan(app: FastAPI):
@@ -17,3 +19,5 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(router = user_controller.user_router)
 app.include_router(router=organization_controller.organization_router)
 app.include_router(router=project_controller.project_router)
+app.include_router(router=task_controller.task_router)
+app.include_router(router=comment_controller.comment_router)
