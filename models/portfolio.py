@@ -3,8 +3,8 @@ from tortoise import fields
 
 class portfolio(Model):
     id = fields.UUIDField(pk=True)
-    organization_id = fields.ForeignKeyField("models.organization", related_name='Organization Portfolio', on_delete=fields.OnDelete.CASCADE )
-    owner_id = fields.ForeignKeyField("models.account", related_name='Portfolio Owner', on_delete=fields.OnDelete.CASCADE )
+    organization = fields.ForeignKeyField("models.organization", related_name='Organization Portfolio', on_delete=fields.OnDelete.CASCADE )
+    owner = fields.ForeignKeyField("models.account", related_name='Portfolio Owner', on_delete=fields.OnDelete.CASCADE )
     name = fields.CharField(max_length=20)
     status = fields.CharField(max_length = 10, null=True)
     start_date = fields.DateField(null=True)

@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from helpers.tortoise_config import init
+from controllers import user_controller
+
 
 async def lifespan(app: FastAPI):
     await init()
@@ -10,6 +12,4 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/")
-def hello_world():
-    return "Hello World"
+app.include_router(router = user_controller.user_router)
