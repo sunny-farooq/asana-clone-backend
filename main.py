@@ -5,7 +5,7 @@ from controllers import organization_controller
 from controllers import project_controller
 from controllers import task_controller
 from controllers import comment_controller
-from controllers import portfolio_controller
+from controllers import portfolio_controller, goal_controller
 
 
 async def lifespan(app: FastAPI):
@@ -23,3 +23,4 @@ app.include_router(router=project_controller.project_router)
 app.include_router(router=task_controller.task_router)
 app.include_router(router=comment_controller.comment_router)
 app.include_router(router=portfolio_controller.portfolio_router)
+app.include_router(router=goal_controller.goal_router)

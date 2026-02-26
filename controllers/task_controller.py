@@ -5,6 +5,7 @@ from models.task import task
 from models.task_like import task_like
 from typing import Annotated
 from pydantic import BaseModel
+from models.project import project
 
 
 task_router = APIRouter(tags=['Tasks'])
@@ -25,7 +26,7 @@ def tasks_health():
 @task_router.post("/create-task")
 async def create_task(request: task_to_be_created, user: Annotated[account, Depends(read_current_user)]):
     org_id = user.organization_id
-    project = await project.get_or_none(organization_id=org_id)  
+    projected = await project.get_or_none(organization_id=org_id)  
     create_task = await task.create(category=request.category,assign_date=request.assign_date,due_date=request.due_date, priority=request.priority, status=request.status,assignee_id=str(user.id),project_id=str(project.id))
     return create_task
 
