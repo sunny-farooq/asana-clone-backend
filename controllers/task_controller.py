@@ -16,6 +16,7 @@ class task_to_be_created(BaseModel):
     due_date: str
     priority: str
     status: str
+    
 
 @task_router.post("/create-task")
 async def create_task(request: task_to_be_created, user: Annotated[account, Depends(read_current_user)]):
