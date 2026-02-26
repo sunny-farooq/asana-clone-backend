@@ -7,7 +7,7 @@ from models.account import account
 from datetime import date
 
 class card_details(BaseModel):
-    card_number: int
+    card_number: str
     exp_date: int
     card_cvv: int
 
@@ -19,6 +19,9 @@ def health():
 
 @organization_router.post("/change_name")
 async def org_name_change(user: Annotated[account,Depends(read_current_user)],new_name:str):
+    """
+    Lala
+    """
     try:
         org_id = user.organization_id
         await organization.filter(id=org_id).update(name=new_name)

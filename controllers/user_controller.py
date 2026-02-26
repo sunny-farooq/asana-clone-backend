@@ -4,20 +4,18 @@ from models.organization import organization
 from models.organization_member import organization_member
 from argon2 import PasswordHasher
 from helpers.user_helper import create_access_token
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 ph = PasswordHasher()
 
 class signup(BaseModel):
     name: str
-    email: str
+    email: EmailStr
     password: str
 
 user_router = APIRouter(tags = ["User"])
 
-@user_router.get("/")
-def what():
-    return {"status": "admin_router is Working Properly"}
+
 
 @user_router.post("/signup")
 async def user_signup(request: signup):
