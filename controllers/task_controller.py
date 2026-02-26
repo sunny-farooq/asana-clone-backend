@@ -2,7 +2,7 @@ from helpers.user_helper import read_current_user
 from fastapi import APIRouter, Depends
 from models.account import account
 from models.task import task
-
+from models.task_like import task_like
 from typing import Annotated
 from pydantic import BaseModel
 
@@ -28,4 +28,10 @@ async def create_task(request: task_to_be_created, user: Annotated[account, Depe
     project = await project.get_or_none(organization_id=org_id)  
     create_task = await task.create(category=request.category,assign_date=request.assign_date,due_date=request.due_date, priority=request.priority, status=request.status,assignee_id=str(user.id),project_id=str(project.id))
     return create_task
+
+@task_router.post("/like_task")
+async def like_task(task_id:str,user: Annotated[account, Depends(read_current_user)]):
+    user_id = user.id
+    await task_like.create(account_id=user_id,task_id=task_id)
+    return {"status": "task_liked"}
     
