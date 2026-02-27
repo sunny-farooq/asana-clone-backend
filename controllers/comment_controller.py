@@ -42,6 +42,7 @@ async def get_comment(comment_id:str,user: Annotated[account, Depends(read_curre
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+
 @comment_router.delete("/delete_comment")
 async def delete_comment(commentid:str, user: Annotated[account, Depends(read_current_user)]):
     try:
