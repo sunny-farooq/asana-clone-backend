@@ -2,7 +2,6 @@ from helpers.user_helper import read_current_user
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Annotated
 from models.comment import comment
-from models.task import task
 from models.account import account
 
 
@@ -26,5 +25,30 @@ async def change_comment(comment_id: str, update_text:str,user: Annotated[accoun
         return {"status":"comments updated"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+@comment_router.get("/get-all-comments")
+async def get_all_comments(taskid:str, user: Annotated[account, Depends(read_current_user)]):
+    try:
+        all_comments=await comment.filter(task_id=taskid).all()
+        return all_comments
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+@comment_router.get("/get-comment")
+async def get_comment(comment_id:str,user: Annotated[account, Depends(read_current_user)]):
+    try:
+        comment = await comment.get_or_none(id=comment_id)
+        return comment
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+@comment_router.delete("/delete_comment")
+async def delete_comment(commentid:str, user: Annotated[account, Depends(read_current_user)]):
+    try:
+        comment_delete= await comment.filter(id=commentid)
+        comment_delete.delete()
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
 
 

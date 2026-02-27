@@ -39,7 +39,22 @@ async def list_tasks(projectID: str, user: Annotated[account, Depends(read_curre
     project_tasks=await task.filter(project_id=projectID).all()
     return project_tasks
 
+@task_router.get("/get-task")
+async def get_task(task_id: str,user: Annotated[account, Depends(read_current_user)]):
+    try:
+        wanted_task = await task.get_or_none(id=task_id)
+        return wanted_task
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Error: {e}")
 
+@task_router.delete("/delete-task")
+async def delete_task(task_id: str,user: Annotated[account, Depends(read_current_user)]):
+    try:
+        task_to_delete = await task.get_or_none(id=task_id)
+        await task_to_delete.delete()
+        return {"status": "task successfully deleted"}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=f"Error: {e}")
 
 
 @task_router.post("/like_task")

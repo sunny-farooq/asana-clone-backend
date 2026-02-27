@@ -13,15 +13,9 @@ class card_details(BaseModel):
 
 organization_router = APIRouter(tags=["Organization"])
 
-@organization_router.get("/organization-health")
-def health():
-    return "Good Health"
-
-@organization_router.post("/change_name")
-async def org_name_change(user: Annotated[account,Depends(read_current_user)],new_name:str):
-    """
-    Lala
-    """
+@organization_router.patch("/update_organization")
+async def update_organization(user: Annotated[account,Depends(read_current_user)],new_name:str):
+    
     try:
         org_id = user.organization_id
         await organization.filter(id=org_id).update(name=new_name)
@@ -48,5 +42,28 @@ async def activate_trial(user: Annotated[account,Depends(read_current_user)]):
         return {"status":"trial activated"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
 
-
+@organization_router.post("/new_organization")
+async def create_new_organization(name:str, user: Annotated[account,Depends(read_current_user)]):
+    try:
+        new_org=await organization.create(name=name)
+        return new_org
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
+    
+@organization_router.get("/get_organization")
+async def get_organization(org_id:str, user: Annotated[account,Depends(read_current_user)]):
+    try:
+        org = await organization.get_or_none(id=org_id)
+        return org
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
+    
+@organization_router.delete("/delete_organization")
+async def delete_organization(org_id:str, user: Annotated[account, Depends(read_current_user)]):
+    try:
+        org_to_delete = await organization.filter(id=org_id).all()
+        await org_to_delete.delete()
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
