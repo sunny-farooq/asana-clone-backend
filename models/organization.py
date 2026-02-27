@@ -3,6 +3,7 @@ from tortoise import fields
 
 class organization(Model):
     id = fields.UUIDField(pk=True)
+    owner = fields.ForeignKeyField('models.account', related_name='Account owner', on_delete=fields.OnDelete.CASCADE, null = True)
     name = fields.CharField(max_length=40, null = True)
     trial_status = fields.CharField(max_length=40, default = "Inactive")
     billing_date = fields.DateField(null = True)

@@ -1,19 +1,34 @@
 from fastapi import FastAPI
-from helpers.tortoise_config import init
 from controllers import user_controller
 from controllers import organization_controller
 from controllers import project_controller
 from controllers import task_controller
 from controllers import comment_controller
 from controllers import portfolio_controller, goal_controller
+from contextlib import asynccontextmanager
+from tortoise import Tortoise
+from helpers.tortoise_config import TORTOISE_CONFIG
 
 
-async def lifespan(app: FastAPI):
-    await init()
+# async def lifespan(app: FastAPI):
+#     await init()
+#     print("Starting DB")
+
+#     yield
+#     print("Closing")
+
+
+@asynccontextmanager
+async def lifespan(app):
+    await Tortoise.init(
+      config=TORTOISE_CONFIG,
+    )
     print("Starting DB")
 
+    # await Tortoise.generate_schemas()
     yield
-    print("Closing")
+    print("Closing DB")
+    await Tortoise.close_connections()
 
 app = FastAPI(lifespan=lifespan)
 
