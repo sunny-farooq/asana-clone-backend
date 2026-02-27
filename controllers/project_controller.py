@@ -12,7 +12,7 @@ async def create_project(user: Annotated[account,Depends(read_current_user)],pro
     try:
         org_id = user.organization_id
         new_project = await project.create(name=project_name, status="Ongoing", organization_id=org_id)
-        return {"status":"Project Creation Successful","project_name":project_name}
+        return new_project
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 

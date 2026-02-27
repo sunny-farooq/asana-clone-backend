@@ -25,7 +25,7 @@ async def change_comment(comment_id: str, update_text:str,user: Annotated[accoun
         return {"status":"comments updated"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
-    
+   
 @comment_router.get("/get-all-comments")
 async def get_all_comments(taskid:str, user: Annotated[account, Depends(read_current_user)]):
     try:

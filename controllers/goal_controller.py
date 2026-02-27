@@ -13,8 +13,8 @@ async def create_goals(title:str,user: Annotated[account,Depends(read_current_us
     try:
         user_id = user.id
         user_org = user.organization_id
-        await goal.create(title=title, owner_id=user_id, organization_id=user_org)
-        return {"status":"goal created"}
+        created_goal=await goal.create(title=title, owner_id=user_id, organization_id=user_org)
+        return created_goal
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -36,9 +36,9 @@ async def add_tasks(taskid: str, goalid:str, user: Annotated[account, Depends(re
         raise HTTPException(status_code=404, detail=str(e))
     
 @goal_router.delete("/remove-project-from-goal")
-async def remove_project_from_goal(projectid: str,goalid:str, user: Annotated[account,Depends(read_current_user)]):
+async def remove_project_from_goal(projectid: str, user: Annotated[account,Depends(read_current_user)]):
     try:
-        project_to_remove = await goal_projects.filter(goal_id=goalid,project_id=projectid)
+        project_to_remove = await goal_projects.get_or_none(project_id=projectid)
         await project_to_remove.delete()
         return {"status":"project removed from Goal"}
     except Exception as e:
@@ -47,7 +47,7 @@ async def remove_project_from_goal(projectid: str,goalid:str, user: Annotated[ac
 @goal_router.delete("/remove-task-from-goal")
 async def remove_task_from_goal(taskid: str, goalid:str, user: Annotated[account, Depends(read_current_user)]):
     try:
-        task_to_remove=await goal_tasks.filter(goal_id=goalid,task_id=taskid)
+        task_to_remove=await goal_tasks.get_or_none(task_id=taskid)
         await task_to_remove.delete()
         return {"status":"Tasks removed from the Goal"}
     except Exception as e:
@@ -56,15 +56,16 @@ async def remove_task_from_goal(taskid: str, goalid:str, user: Annotated[account
 @goal_router.patch("/update_goal")
 async def update_goal(goalid:str, new_title:str, user: Annotated[account, Depends(read_current_user)]):
     try:
-        updated_goal = await goal.filter(id=goalid).update(title=new_title)
-        return updated_goal
+        await goal.filter(id=goalid).update(title=new_title)
+        return {"status":f"Updated to goal name to {new_title}"}
+
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
     
 @goal_router.delete("/delete-goal")
 async def delete_goal(goalid:str, user: Annotated[account, Depends(read_current_user)]):
     try:
-        deleted_goal = await goal.filter(id=goalid)
+        deleted_goal = await goal.get_or_none(id=goalid)
         deleted_goal.delete()
         return {"status":"status deleted successfully"}
     except Exception as e:
