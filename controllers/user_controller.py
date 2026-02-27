@@ -38,7 +38,7 @@ async def user_signup(request: signup):
     except Exception as e:
         raise HTTPException(401, str(e))
 
-@user_router.get("/login")
+@user_router.post("/login")
 async def login(request: Login):
     try:
         user = await account.get_or_none(email=request.email)

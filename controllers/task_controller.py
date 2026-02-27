@@ -16,7 +16,7 @@ class task_to_be_created(BaseModel):
     due_date: str
     priority: str
     status: str
-    
+
 
 @task_router.post("/create-task")
 async def create_task(request: task_to_be_created, user: Annotated[account, Depends(read_current_user)]):
@@ -27,6 +27,20 @@ async def create_task(request: task_to_be_created, user: Annotated[account, Depe
         return create_task
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+@task_router.post("/update-task")
+async def update_task(category:str, taskid:str,user: Annotated[account, Depends(read_current_user)]):
+    await task.filter(id=taskid).update(category=category)
+    updated_task = await task.get_or_none(id=taskid)
+    return updated_task
+
+@task_router.get("/list-tasks")
+async def list_tasks(projectID: str, user: Annotated[account, Depends(read_current_user)]):
+    project_tasks=await task.filter(project_id=projectID).all()
+    return project_tasks
+
+
+
 
 @task_router.post("/like_task")
 async def like_task(task_id:str,user: Annotated[account, Depends(read_current_user)]):
@@ -34,6 +48,15 @@ async def like_task(task_id:str,user: Annotated[account, Depends(read_current_us
         user_id = user.id
         await task_like.create(account_id=user_id,task_id=task_id)
         return {"status": "task_liked"}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+@task_router.delete("/unlike_task")
+async def unlike_task(task_id:str,user: Annotated[account, Depends(read_current_user)]):
+    try:
+        task_to_unlike = await task_like.get_or_none(task_id=task_id)
+        await task_to_unlike.delete()
+        {"status":"Status Unliked"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
     
