@@ -23,10 +23,10 @@ async def create_portfolio(name: str,user: Annotated[account, Depends(read_curre
     user_id = user.id
     user_org = user.organization_id
     try:
-        await portfolio.create(organization_id=user_org,owner_id=user_id,name=name,status="ongoing")
-        return {"status": "Portfolio created Successfully"}
+        new_port = await portfolio.create(organization_id=user_org,owner_id=user_id,name=name,status="ongoing")
+        return new_port
     except Exception as e:
-        return {"status":"Error Occurred"}
+        raise HTTPException(status_code=404,detail=str(e))
     
 @portfolio_router.get("/get-portfolio")
 async def get_portfolio(portfolio_id:str, user: Annotated[account, Depends(read_current_user)]):
@@ -40,7 +40,8 @@ async def get_portfolio(portfolio_id:str, user: Annotated[account, Depends(read_
 async def update_portfolio(portfolio_id:str, name:str, user: Annotated[account, Depends(read_current_user)]):
     try: 
         await portfolio.filter(id=portfolio_id).update(name=name)
-        return {"status":f"name set to {name} successfully of your portfolio"}
+        portfolio_updated = await portfolio.get_or_none(id = portfolio_id)
+        return portfolio_updated
     except Exception as e:
         raise HTTPException(status_code=400,detail=str(e))
     

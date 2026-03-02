@@ -17,23 +17,6 @@ class task_to_be_created(BaseModel):
     priority: str
     status: str
 
-
-@task_router.post("/create-task")
-async def create_task(request: task_to_be_created, user: Annotated[account, Depends(read_current_user)]):
-    try:
-        org_id = user.organization_id
-        projected = await project.get_or_none(organization_id=org_id)  
-        create_task = await task.create(category=request.category,assign_date=request.assign_date,due_date=request.due_date, priority=request.priority, status=request.status,assignee_id=str(user.id),project_id=str(projected.id))
-        return create_task
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    
-@task_router.post("/update-task")
-async def update_task(category:str, taskid:str,user: Annotated[account, Depends(read_current_user)]):
-    await task.filter(id=taskid).update(category=category)
-    updated_task = await task.get_or_none(id=taskid)
-    return updated_task
-
 @task_router.get("/list-tasks")
 async def list_tasks(projectID: str, user: Annotated[account, Depends(read_current_user)]):
     project_tasks=await task.filter(project_id=projectID).all()
@@ -46,6 +29,21 @@ async def get_task(task_id: str,user: Annotated[account, Depends(read_current_us
         return wanted_task
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Error: {e}")
+
+
+@task_router.post("/create-task")
+async def create_task(projectid:str,request: task_to_be_created, user: Annotated[account, Depends(read_current_user)]):
+    try:
+        create_task = await task.create(category=request.category,assign_date=request.assign_date,due_date=request.due_date, priority=request.priority, status=request.status,assignee_id=str(user.id),project_id=str(projectid))
+        return create_task
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    
+@task_router.post("/update-task")
+async def update_task(category:str, taskid:str,user: Annotated[account, Depends(read_current_user)]):
+    await task.filter(id=taskid).update(category=category)
+    updated_task = await task.get_or_none(id=taskid)
+    return updated_task
 
 @task_router.delete("/delete-task")
 async def delete_task(task_id: str,user: Annotated[account, Depends(read_current_user)]):

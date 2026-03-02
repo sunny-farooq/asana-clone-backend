@@ -6,6 +6,7 @@ from argon2 import PasswordHasher
 from helpers.user_helper import create_access_token, read_current_user
 from pydantic import BaseModel, EmailStr
 from typing import Annotated
+from uuid import UUID
 
 
 ph = PasswordHasher()
@@ -18,6 +19,14 @@ class signup(BaseModel):
 class Login(BaseModel):
     email: EmailStr
     password: str
+
+class GetUser(BaseModel):
+    name: str
+    email: str
+    role: str
+    id: UUID
+    is_verified: bool
+    organization_id: UUID
 
 user_router = APIRouter(tags = ["User"])
 
@@ -52,11 +61,11 @@ async def login(request: Login):
     except Exception as e:
         raise HTTPException(status_code=405,detail= "Wrong Password")
     
-@user_router.get("/get-user")
+@user_router.get("/get-user", response_model=GetUser)
 async def get_user(user: Annotated[account,Depends(read_current_user)]):
     return user
 
-@user_router.patch("/update-user")
+@user_router.patch("/update-user",  response_model=GetUser)
 async def update_user(name: str,user: Annotated[account,Depends(read_current_user)]):
     await account.filter(id=user.id).update(name=name)
     updated_user = await account.get_or_none(id=user.id)

@@ -57,8 +57,8 @@ async def remove_task_from_goal(taskid: str, goalid:str, user: Annotated[account
 async def update_goal(goalid:str, new_title:str, user: Annotated[account, Depends(read_current_user)]):
     try:
         await goal.filter(id=goalid).update(title=new_title)
-        return {"status":f"Updated to goal name to {new_title}"}
-
+        updated_goal = await goal.get_or_none(id=goalid)
+        return updated_goal
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
     

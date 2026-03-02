@@ -13,28 +13,47 @@ class card_details(BaseModel):
 
 organization_router = APIRouter(tags=["Organization"])
 
+@organization_router.get("/get-all-organizations")
+async def get_organization(user: Annotated[account,Depends(read_current_user)]):
+    try:
+        user_id = user.id
+        return await organization.filter(owner_id = user_id).all()
+
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
+
+
+@organization_router.get("/get_organization")
+async def get_organization(org_id:str, user: Annotated[account,Depends(read_current_user)]):
+    try:
+        org = await organization.get_or_none(id=org_id)
+        return org
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
+
 @organization_router.patch("/update_organization")
-async def update_organization(user: Annotated[account,Depends(read_current_user)],new_name:str):
+async def update_organization(org_id: str, user: Annotated[account,Depends(read_current_user)],new_name:str):
     
     try:
-        org_id = user.organization_id
-        await organization.filter(id=org_id).update(name=new_name)
-        return {"new_name": new_name}
+        user_id = user.id
+        await organization.filter(id=org_id,owner_id = user_id).update(name=new_name)
+        org = await organization.get_or_none(id=org_id)
+        return org
     except Exception as e:
             raise HTTPException(status_code=404, detail=str(e))
 
 @organization_router.post("/add_card")
-async def add_card(user: Annotated[account,Depends(read_current_user)], request: card_details):
+async def add_card(org_id:str ,user: Annotated[account,Depends(read_current_user)], request: card_details):
     try:
-        org_id = user.organization_id
-        await organization.filter(id=org_id).update(card_number=request.card_number, card_expiry=request.exp_date, card_cvv=request.card_cvv)
+        user_id = user.id
+        await organization.filter(id=org_id,owner_id=user_id).update(card_number=request.card_number, card_expiry=request.exp_date, card_cvv=request.card_cvv)
         return {"status":"updated"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
 
 
 @organization_router.post("/activate_trial")
-async def activate_trial(user: Annotated[account,Depends(read_current_user)]):
+async def activate_trial(org_id:str, user: Annotated[account,Depends(read_current_user)]):
     try:
         day_today = date.today()
         org_id = user.organization_id
@@ -52,28 +71,11 @@ async def create_new_organization(name:str, user: Annotated[account,Depends(read
         return new_org
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
-    
-@organization_router.get("/get_organization")
-async def get_organization(org_id:str, user: Annotated[account,Depends(read_current_user)]):
-    try:
-        org = await organization.get_or_none(id=org_id)
-        return org
-    except Exception as e:
-        raise HTTPException(status_code=404,detail=str(e))
-    
-@organization_router.get("/get-all-organizations")
-async def get_organization(user: Annotated[account,Depends(read_current_user)]):
-    try:
-        user_id = user.id
-        return await organization.filter(owner_id = user_id).all()
-
-    except Exception as e:
-        raise HTTPException(status_code=404,detail=str(e))
 
 @organization_router.delete("/delete_organization")
 async def delete_organization(org_id:str, user: Annotated[account, Depends(read_current_user)]):
     try:
-        org_to_delete = await organization.filter(id=org_id).all()
-        await org_to_delete.delete()
+        org_to_delete = await organization.filter(id=org_id).delete()
+        return {"org": org_id, "status":"Deleted"}
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
