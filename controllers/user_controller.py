@@ -33,6 +33,9 @@ async def user_signup(request: signup):
         new_organization = await organization.create(name=organization_name)
         hashed_password=ph.hash(request.password)   
         new_user = await account.create(name=request.name,email=request.email,password=hashed_password,role="owner",organization_id=new_organization.id)
+        new_user_id = new_user.id
+        new_org_id = new_organization.id
+        await organization.filter(id=new_org_id).update(owner_id=new_user_id)
         new_org_member = await organization_member.create(role="owner", account_id=new_user.id, organization_id=new_organization.id  )
         return {"name": new_user.name, "email": request.email, "Organization_name": organization_name, "organization_member_id": new_org_member.id }
     except Exception as e:

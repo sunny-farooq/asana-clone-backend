@@ -47,7 +47,8 @@ async def activate_trial(user: Annotated[account,Depends(read_current_user)]):
 @organization_router.post("/new_organization")
 async def create_new_organization(name:str, user: Annotated[account,Depends(read_current_user)]):
     try:
-        new_org=await organization.create(name=name)
+        org_owner_id = user.id
+        new_org=await organization.create(name=name,owner_id=org_owner_id)
         return new_org
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
@@ -60,6 +61,15 @@ async def get_organization(org_id:str, user: Annotated[account,Depends(read_curr
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
     
+@organization_router.get("/get-all-organizations")
+async def get_organization(user: Annotated[account,Depends(read_current_user)]):
+    try:
+        user_id = user.id
+        return await organization.filter(owner_id = user_id).all()
+
+    except Exception as e:
+        raise HTTPException(status_code=404,detail=str(e))
+
 @organization_router.delete("/delete_organization")
 async def delete_organization(org_id:str, user: Annotated[account, Depends(read_current_user)]):
     try:
