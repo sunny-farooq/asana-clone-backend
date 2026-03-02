@@ -18,10 +18,10 @@ async def read_current_user(credentials: Annotated[HTTPAuthorizationCredentials,
        payload =  decode_token(credentials.credentials)
        user = await account.get_or_none(id=payload.get("user_id", None))
        if not user:
-          raise HTTPException("User not found")
+          raise HTTPException(status_code=404,detail="User Not Found")
        return user
     except Exception as e:
-       raise HTTPException(f" Error: {e}")
+       raise HTTPException(status_code = 404,detail=f" Error: {e}")
 
 
 def create_access_token(payload: dict):

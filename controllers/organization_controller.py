@@ -5,6 +5,8 @@ from typing import Annotated
 from pydantic import BaseModel
 from models.account import account
 from datetime import date
+from uuid import UUID
+from typing import List, Optional
 
 class card_details(BaseModel):
     card_number: str
@@ -17,7 +19,7 @@ organization_router = APIRouter(tags=["Organization"])
 async def get_organization(user: Annotated[account,Depends(read_current_user)]):
     try:
         user_id = user.id
-        return await organization.filter(owner_id = user_id).all()
+        return await organization.filter(owner_id = user_id).values("id","name","owner_id","trial_status")
 
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
@@ -26,7 +28,7 @@ async def get_organization(user: Annotated[account,Depends(read_current_user)]):
 @organization_router.get("/get_organization")
 async def get_organization(org_id:str, user: Annotated[account,Depends(read_current_user)]):
     try:
-        org = await organization.get_or_none(id=org_id)
+        org = await organization.filter(id=org_id).values("id","name","owner_id","trial_status")
         return org
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
@@ -37,7 +39,7 @@ async def update_organization(org_id: str, user: Annotated[account,Depends(read_
     try:
         user_id = user.id
         await organization.filter(id=org_id,owner_id = user_id).update(name=new_name)
-        org = await organization.get_or_none(id=org_id)
+        org = await organization.get_or_none(id=org_id).values("id","name","owner_id","trial_status")
         return org
     except Exception as e:
             raise HTTPException(status_code=404, detail=str(e))
@@ -68,7 +70,9 @@ async def create_new_organization(name:str, user: Annotated[account,Depends(read
     try:
         org_owner_id = user.id
         new_org=await organization.create(name=name,owner_id=org_owner_id)
-        return new_org
+        new_org_id = new_org.id
+        org = await organization.get_or_none(id=new_org_id).values("id","name","owner_id","trial_status")
+        return org
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
 
