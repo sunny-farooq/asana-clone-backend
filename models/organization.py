@@ -1,6 +1,7 @@
 from tortoise.models import Model
 from tortoise import fields
 
+
 class organization(Model):
     id = fields.UUIDField(pk=True)
     name = fields.CharField(max_length=40, null = True)
@@ -11,7 +12,7 @@ class organization(Model):
     card_cvv = fields.CharField(max_length = 3,null = True)
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
-    owner = fields.ForeignKeyField('models.account', related_name='Owner of the Organization', on_delete=fields.OnDelete.CASCADE, null = True)
+    participant = fields.ForeignKeyField('models.account', related_name='Owner of the Organization', on_delete=fields.OnDelete.CASCADE, null = True)
 
     class Meta:
         table = "Organizations"

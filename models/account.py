@@ -1,5 +1,10 @@
 from tortoise.models import Model
 from tortoise import fields
+from enum import Enum
+
+class UserRole(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
 
 class account(Model):
     id = fields.UUIDField(pk=True)
@@ -8,7 +13,7 @@ class account(Model):
     name=fields.CharField(max_length=40)
     password = fields.CharField(max_length=500)
     is_verified = fields.BooleanField(default = False)
-    role = fields.CharField(max_length=10)
+    role = fields.CharEnumField(UserRole, default=UserRole.USER)
     created_at = fields.DatetimeField(auto_now_add=True)
     updated_at = fields.DatetimeField(auto_now=True)
 
