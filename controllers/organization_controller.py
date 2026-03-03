@@ -19,7 +19,7 @@ organization_router = APIRouter(tags=["Organization"])
 async def get_organization(user: Annotated[account,Depends(read_current_user)]):
     try:
         user_id = user.id
-        return await organization.filter(owner_id = user_id).values("id","name","owner_id","trial_status")
+        return await organization.filter(participant_id = user_id).values("id","name","participant_id","trial_status")
 
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
@@ -69,9 +69,9 @@ async def activate_trial(org_id:str, user: Annotated[account,Depends(read_curren
 async def create_new_organization(name:str, user: Annotated[account,Depends(read_current_user)]):
     try:
         org_owner_id = user.id
-        new_org=await organization.create(name=name,owner_id=org_owner_id)
+        new_org=await organization.create(name=name,participant_id=org_owner_id)
         new_org_id = new_org.id
-        org = await organization.get_or_none(id=new_org_id).values("id","name","owner_id","trial_status")
+        org = await organization.get_or_none(id=new_org_id).values("id","name","participant_id","trial_status")
         return org
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))

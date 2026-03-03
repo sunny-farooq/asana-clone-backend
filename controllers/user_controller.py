@@ -41,11 +41,11 @@ async def user_signup(request: signup):
     try:
         new_organization = await organization.create(name=organization_name)
         hashed_password=ph.hash(request.password)   
-        new_user = await account.create(name=request.name,email=request.email,password=hashed_password,role="owner",organization_id=new_organization.id)
+        new_user = await account.create(name=request.name,email=request.email,password=hashed_password,role="admin",organization_id=new_organization.id)
         new_user_id = new_user.id
         new_org_id = new_organization.id
-        await organization.filter(id=new_org_id).update(owner_id=new_user_id)
-        new_org_member = await organization_member.create(role="owner", account_id=new_user.id, organization_id=new_organization.id  )
+        await organization.filter(id=new_org_id).update(participant_id=new_user_id)
+        new_org_member = await organization_member.create(role="admin", account_id=new_user.id, organization_id=new_organization.id  )
         return {"name": new_user.name, "email": request.email, "Organization_name": organization_name, "organization_member_id": new_org_member.id }
     except Exception as e:
         raise HTTPException(401, str(e))
@@ -60,6 +60,15 @@ async def login(request: Login):
         return {"token": token}
     except Exception as e:
         raise HTTPException(status_code=405,detail= "Wrong Password")
+    
+@user_router.post("/verify_user")
+async def verify_user(user: Annotated[account,Depends(read_current_user)]):
+    try:
+        user_id = user.id
+        await user.filter(id=user_id).update(is_verified=True)
+        return {"status":"Completed","message":"Successfully verified"}
+    except Exception as e:
+        raise HTTPException(status_code=404,detail="User Not Found")
     
 @user_router.get("/get-user", response_model=GetUser)
 async def get_user(user: Annotated[account,Depends(read_current_user)]):

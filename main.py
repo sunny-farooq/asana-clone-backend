@@ -5,6 +5,7 @@ from controllers import project_controller
 from controllers import task_controller
 from controllers import comment_controller
 from controllers import portfolio_controller, goal_controller
+from controllers import org_worker
 from contextlib import asynccontextmanager
 from tortoise import Tortoise
 from helpers.tortoise_config import TORTOISE_CONFIG
@@ -39,3 +40,4 @@ app.include_router(router=task_controller.task_router)
 app.include_router(router=comment_controller.comment_router)
 app.include_router(router=portfolio_controller.portfolio_router)
 app.include_router(router=goal_controller.goal_router)
+app.include_router(router=org_worker.org_worker)
