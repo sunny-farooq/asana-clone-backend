@@ -16,7 +16,7 @@ class card_details(BaseModel):
 organization_router = APIRouter(tags=["Organization"])
 
 @organization_router.get("/get-all-organizations")
-async def get_organization(user: Annotated[account,Depends(read_current_user)]):
+async def get_organizations(user: Annotated[account,Depends(read_current_user)]):
     try:
         user_id = user.id
         return await organization.filter(participant_id = user_id).values("id","name","participant_id","trial_status")
@@ -28,7 +28,7 @@ async def get_organization(user: Annotated[account,Depends(read_current_user)]):
 @organization_router.get("/get_organization")
 async def get_organization(org_id:str, user: Annotated[account,Depends(read_current_user)]):
     try:
-        org = await organization.filter(id=org_id).values("id","name","owner_id","trial_status")
+        org = await organization.filter(id=org_id).values("id","name","participant_id","trial_status")
         return org
     except Exception as e:
         raise HTTPException(status_code=404,detail=str(e))
@@ -38,8 +38,8 @@ async def update_organization(org_id: str, user: Annotated[account,Depends(read_
     
     try:
         user_id = user.id
-        await organization.filter(id=org_id,owner_id = user_id).update(name=new_name)
-        org = await organization.get_or_none(id=org_id).values("id","name","owner_id","trial_status")
+        await organization.filter(id=org_id,participant_id = user_id).update(name=new_name)
+        org = await organization.get_or_none(id=org_id).values("id","name","participant_id","trial_status")
         return org
     except Exception as e:
             raise HTTPException(status_code=404, detail=str(e))

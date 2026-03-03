@@ -24,11 +24,10 @@ async def list_tasks(projectID: str, user: Annotated[account, Depends(read_curre
 
 @task_router.get("/get-task")
 async def get_task(task_id: str,user: Annotated[account, Depends(read_current_user)]):
-    try:
         wanted_task = await task.get_or_none(id=task_id)
+        if not wanted_task:
+          raise HTTPException(404, "Task Not Found")
         return wanted_task
-    except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Error: {e}")
 
 
 @task_router.post("/create-task")
@@ -63,6 +62,11 @@ async def like_task(task_id:str,user: Annotated[account, Depends(read_current_us
         return {"status": "task_liked"}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+    
+# @task_router("/get-likes")
+# async def get_likes(task_id:str,user: Annotated[account, Depends(read_current_user)]):
+#     try:
+#         user
     
 @task_router.delete("/unlike_task")
 async def unlike_task(task_id:str,user: Annotated[account, Depends(read_current_user)]):
